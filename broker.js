@@ -18,6 +18,6 @@ app.get('/', function (req, res) {
     );
 });
 
-var listener = app.listen(process.env.BROKER_LISTEN_PORT, function(){
+var listener = app.listen(8080, function(){
     console.log('Listening on port ' + listener.address().port);
 });
