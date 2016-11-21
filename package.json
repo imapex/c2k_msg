@@ -1,0 +1,13 @@
+{
+  "name": "c2k_msg_broker",
+  "version": "1.0.0",
+  "description": "Cisco Kiddie Kounter Message Broker on Docker",
+  "author": "Harish Chawla <hachawla@cisco.com>",
+  "main": "broker.js",
+  "scripts": {
+    "start": "node broker.js"
+  },
+  "dependencies": {
+    "express": "^4.13.3"
+  }
+}
