@@ -1,0 +1,20 @@
+build:
+  build_starting:
+     image: node:argon
+     commands:
+      - echo "Beginning new build"
+  run_tests:
+    image: node:argon
+    commands:
+      - echo "Running tests"
+
+publish:
+  docker:
+    repo: $$DOCKER_USERNAME/$$DOCKER_REPO
+    tag: latest
+
+deploy:
+  webhook:
+    image: plugins/drone-webhook
+    urls:
+      - https://$$MARATHON/marathon/v2/apps/$$APPNAME/restart
