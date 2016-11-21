@@ -6,13 +6,15 @@
 
 const express = require('express');
 
+var mode   = process.env.SOME_TOKEN;
+
 // Constants
 const PORT = 8080;
 
 // App
 const app = express();
 app.get('/', function (req, res) {
-    res.send('Hey man - this is a crazy world\n');
+    res.send('Hey man - this is a crazy world\n' + mode);
 });
 
 app.listen(PORT);

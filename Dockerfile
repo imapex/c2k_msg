@@ -11,6 +11,9 @@ RUN npm install
 # Bundle app source
 COPY . /usr/src/app
 
+# Set environment variable
+RUN export SOME_TOKEN=63et36ter28y6yy76yt
+
 # Port that node server runs on within the container
 EXPOSE 8080
 

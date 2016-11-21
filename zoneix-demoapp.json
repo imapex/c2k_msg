@@ -6,7 +6,7 @@
             "forcePullImage": true,
             "network": "BRIDGE",
             "portMappings": [{
-                "containerPort": 5000,
+                "containerPort": 8080,
                 "hostPort": 0
             }]
         },
