@@ -12,7 +12,7 @@ RUN npm install
 COPY . /usr/src/app
 
 # Set environment variable
-RUN export SOME_TOKEN=63et36ter28y6yy76yt
+CMD ["export", "SOME_TOKEN", "63et36ter28y6yy76yt"]
 
 # Port that node server runs on within the container
 EXPOSE 8080
