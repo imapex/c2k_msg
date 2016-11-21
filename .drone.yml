@@ -17,7 +17,12 @@ publish:
     tag: latest
 
 deploy:
-  webhook:
-    image: plugins/drone-webhook
-    urls:
-      - https://$$MARATHON/marathon/v2/apps/$$APPNAME/restart
+    webhook:
+        image: plugins/drone-webhook
+        skip_verify: true
+        method: POST
+        auth:
+            username: $$MANTL_USERNAME
+            password: $$MANTL_PASSWORD
+        urls:
+            - https://$$MANTL_CONTROL/marathon/v2/apps/imapex/c2k/c2kmsgbroker/restart?force=true
