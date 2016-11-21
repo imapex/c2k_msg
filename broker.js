@@ -6,16 +6,16 @@
 
 const express = require('express');
 
-var mode   = process.env.SOME_TOKEN;
 
-// Constants
-const PORT = 8080;
+var config = require('./config');
 
-// App
-const app = express();
+var app = require('express')();
+
 app.get('/', function (req, res) {
-    res.send('Hey man - this is a crazy world\n' + mode);
+    res.send('Hey man - config file has this port for Redis \n' + config.redis.port);
 });
 
-app.listen(PORT);
-console.log('Running on http://localhost:' + PORT);
+
+var listener = app.listen(8080, function(){
+    console.log('Listening on port ' + listener.address().port);
+});
