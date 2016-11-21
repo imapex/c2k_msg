@@ -10,7 +10,7 @@ build:
 
 publish:
   docker:
-    repo: $$DOCKER_USERNAME/$$DOCKER_REPO
+    repo: $$DOCKER_USERNAME/c2k_msg
     tag: latest
 
 deploy:
