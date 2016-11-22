@@ -13,6 +13,9 @@
     "request": "^2.72.0",
     "node-sparky": "^3.0.0",
     "redis": "*",
-    "lodash": "*"
+    "lodash": "*",
+    "phone": "*",
+    "body-parser": "*",
+    "bluebird": "*"
   }
 }
