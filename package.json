@@ -16,6 +16,7 @@
     "lodash": "*",
     "phone": "*",
     "body-parser": "*",
-    "bluebird": "*"
+    "bluebird": "*",
+    "tropo-webapi": "*"
   }
 }
