@@ -35,7 +35,7 @@ Promise.promisifyAll(redis.RedisClient.prototype);
 Promise.promisifyAll(redis.Multi.prototype);
 //RedisLabs connection string
 //var client = redis.createClient("redis://spigot:P0p01121@pub-redis-15137.us-east-1-3.2.ec2.garantiadata.com:15137");
-var client = redis.createClient("redis://localhost:6379");
+var client = redis.createClient(process.env.REDIS_CONNECTION);
 //Establish connections to RedisLabs
 client.onAsync('connect', function() {
     console.log('Connected to RedisLabs');
@@ -45,7 +45,7 @@ client.onAsync('connect', function() {
 // Declare a Tropo function
 var tropo_webapi = require('tropo-webapi');
 //var troposmstoken = '646a666751456a45524974676b794b5355446d755758764856637866796d724c656e4275467a7276486e7161';
-var troposmstoken ='70654e5566574d43784d7958674162426374514b665443436d566c4e527177516973586a586749555850546c';
+var troposmstoken = process.env.TROPO_SMS_TOKEN;
 //var tropoSessionAPI = 'api.tropo.com';
 var smsrequest = require("request");
 //var http = require('http');
