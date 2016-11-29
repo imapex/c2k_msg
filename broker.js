@@ -38,7 +38,7 @@ Promise.promisifyAll(redis.Multi.prototype);
 var client = redis.createClient(process.env.REDIS_CONNECTION);
 //Establish connections to RedisLabs
 client.onAsync('connect', function() {
-    console.log('Connected to RedisLabs');
+    console.log('Connected to RedisLabs @' + process.env.REDIS_CONNECTION + '\n');
 });
 
 //*****************************************************************
@@ -55,17 +55,13 @@ var smsrequest = require("request");
 
 
 //Deal with GET requests to this webservice
-app.get('/tropo', function(req, res){
+app.get('/', function(req, res){
     console.log(new Date().toString() + " GET request from "+ req.connection.remoteAddress);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    //res.header("Content-Type", "application/json; charset=utf-8");
-    //res.setEncoding('utf8');
     res.setHeader('Author', 'Harish Chawla');
     res.setHeader('Company', 'Cisco Systems');
     res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
     res.end('BROKER OPERATIONAL @ '+ new Date().toString());
-    //res.end();
-
 });
 
 
@@ -77,8 +73,19 @@ app.post('/tropo', function(req, res){
     console.log(new Date().toString() + 'Recieved new payload from Tropo \n' + JSON.stringify(payload));
     var tropo = new tropo_webapi.TropoWebAPI();
 
+    //-----HANDLE INVALID REQUESTS-----//
+    if (!_.has(payload,'initialText')){
+        console.log("----- CONDITION: INVALID PAYLOAD RECIEVED IN TROPO FUNCTION-----");
+        res.writeHead(404, {'Content-Type': 'application/json ; charset=utf-8'});
+        //res.end(tropo_webapi.TropoJSON(tropo));
+        //res.write(tropo_webapi.TropoJSON(tropo));
+        res.end();
+        //console.log(tropo_webapi.TropoJSON(tropo));
+        console.log('----------------');
+    }
+
     //-----HANDLE OUTBOUND SMS INITIATED BY API CALLS-----//
-    if (_.size(payload.session.initialText) == 0){
+    if (_.has(payload,'initialText') && _.size(payload.session.initialText) == 0){
         console.log("----- CONDITION: OUTBOUND SMS REQUEST FROM NON-HUMAN RECIEVED -----");
         console.log(JSON.stringify(payload));
         console.log("INITIAL TEXT SIZE: " + _.size(payload.session.initialText));
@@ -99,7 +106,7 @@ app.post('/tropo', function(req, res){
         console.log('----------------');
     }
     //-----HANDLE SMS INITIATED BY HUMAN-----//
-    if (_.size(payload.session.initialText) != 0){
+    if (_.has(payload,'initialText') && _.size(payload.session.initialText) != 0){
         console.log("----- CONDITION: SMS FROM HUMAN RECIEVED -----");
         console.log(JSON.stringify(payload));
         var CallerMobile = _.take(phonenorm(payload.session.from.id));
@@ -290,3 +297,131 @@ var spark = new Spark({
     //webhookUrl: 'https://exmachina-sparkspigot.c9users.io:8082/sparkin',
 });
 
+app.post('/c2k', function(req, res) {
+    var payload = req.body;
+    //-----HANDLE INVALID REQUESTS-----//
+    if (!_.has(payload,'appKey') || _.isEmpty(payload.appKey) || _.isNil(payload.appKey)) {
+        console.log("----- CONDITION: INVALID PAYLOAD RECEIVED BY C2K FUNCTION -----");
+        res.writeHead(404, {'Content-Type': 'application/json ; charset=utf-8'});
+        console.log('----------------');
+        res.end('INVALID PAYLOAD RECEIVED BY C2K FUNCTION @ '+ new Date().toString() + '\n');
+    } else {
+        console.log("----- CONDITION: C2K RECEIVED VALID PAYLOAD -----");
+        console.log(new Date().toString() + 'Received new payload from C2K \n' + JSON.stringify(payload) + '\n');
+
+        //--- get information for appKey from Redis ---//
+        client.hgetallAsync(payload.appKey).then(function(redres) {
+
+            //----- APPLICATION NOT IN DATABASE-----//
+            if (_.isEmpty(redres)){
+                console.log("----- CONDITION: APPLICATION NOT IN DATABASE -----");
+                console.log("\n Found no entry for " + payload.appKey);
+                //tropo.say("Please contact your CISCO Account representative to activate your account!");
+                console.log("\n Please contact your CISCO Account representative to activate your account!");
+                res.writeHead(200, {'Content-Type': 'application/json'});
+                res.end('APPLICATION NOT IN DATABASE @ '+ new Date().toString());
+            } else
+
+            //----- APPLICATION EXISTS IN DATABASE, NO SPARK ROOM DEFINED -----//
+            if (!_.isEmpty(redres) && _.size(redres.sparkroomid)<=1) {
+                console.log("----- CONDITION: APPLICATION REGISTERED IN DATABASE, NO SPARK ROOM DEFINED -----");
+                console.log("The registered application "+ payload.appKey + " has no spark room! Creating one... \n");
+
+                //--- create room
+                spark.roomAdd((payload.appKey).toString()).then(function(room){
+                    console.log("----- FUNCTION: CREATE SPARK ROOM & UPDATE DATABASE -----");
+                    console.log('Created room: '+ room.title + ' with ID: '+ room.id + ' for ' + (payload.appKey).toString() + '\n');
+                    client.hmsetAsync((payload.appKey).toString(), {"sparkroomid" : room.id});
+
+                    //--- add registered application owner (spark-id) as member
+                    console.log("----- FUNCTION: ADDING REGISTERED MEMBER TO ROOM -----");
+
+                    /**
+                    //---------------
+                    // node-sparky does not have a fuction to add members by SparkID, hence, we add a overloaded prototype
+                    //---------------
+                    Spark.prototype.membershipAdd = function(roomId, sparkId, moderator) {
+                        if(typeof sparkId === 'string') {
+                            return this.request('post', 'memberships', {
+                                    personId: sparkId,
+                                    roomId: roomId,
+                                    isModerator: (typeof moderator === 'boolean' && moderator)
+                                })
+                                    .then(res => this.toObject(res));
+                        }
+
+                        else {
+                            return when.reject(new Error('not a valid Spark ID'));
+                        }
+                    };
+
+                    spark.membershipAdd(room.id, redres.sparkagentid);
+                    **/
+
+                    spark.membershipAdd(room.id, redres.sparkagentemail);
+
+                    //---- add webhook to room
+                    console.log("----- FUNCTION: ADDING WEBHOOK TO ROOM -----");
+                    //spark.webhookUrl = 'https://exmachina-sparkspigot.c9users.io:8082/sparkhookin/'+room.id;
+                    spark.webhookUrl = listenurl + ':' + listenport + '/c2k/' + room.id;
+                    console.log(spark.webhookUrl);
+                    spark.webhookAdd('messages', 'created', (payload.appKey).toString()+'HOOK', 'roomId='+room.id)
+                        .then(function(webhook) {
+                            client.hmsetAsync((payload.appKey).toString(), {"sparkroomwebhook" : webhook.id});
+                            console.log(webhook.name);
+                        })
+                        .catch(function(err) {
+                            // process error
+                            console.log(err);
+                        });
+
+                    //--- send intro message to room
+                    spark.messageSendRoom(room.id, {
+                        text: "Messaging enabled Spark room with "+ payload.appKey + " now created..."
+                        //markdown: '**'+redres.clientfullname+'**'+" at "+'**'+payload.session.from.id+'**' + " says via SMS: \n>" + payload.session.initialText,
+                        //files: ['http://company.com/myfile.doc']
+                    }).catch(function(err){
+                        console.log(err);
+                    });
+
+                    //--- send first application message to room
+                    spark.messageSendRoom(room.id, {
+                        text: payload.appKey + " sent: " + payload.message
+                    //}).then(function(message) {
+                    //    console.log("----- FUNCTION: PUBLISH SMS TO ROOM -----");
+                    //    console.log('Message sent: %s', JSON.stringify(message));
+                    }).catch(function(err){
+                        console.log(err);
+                    });
+                    //-----------------------------------
+                }).catch(function(err) {
+                    console.log(err);
+                });
+                res.writeHead(200, {'Content-Type': 'application/json'});
+                res.end('APPLICATION EXISTS IN DATABASE, NO SPARK ROOM DEFINED @ '+ new Date().toString());
+            } else
+
+            //----- APPLICATION EXISTS IN DATABASE WITH A DEFINED SPARK ROOM -----//
+            if (!_.isEmpty(redres) && _.size(redres.sparkroomid)>5) {
+                console.log("----- CONDITION: REGISTERED APPLICATOIN EXISTS IN DATABASE WITH DEFINED SPARK ROOM -----");
+                console.log("Application "+ payload.appKey + " has a defined Spark room...publishing message to room...  \n");
+                spark.messageSendRoom(redres.sparkroomid, {
+                    text: "Application ID "+payload.appKey+" sent: \n" + payload.message
+                    //markdown: '**'+redres.clientfullname+'**'+" at "+'**'+payload.session.from.id+'**' + " says via SMS: \n>" + payload.session.initialText
+                    //text: payload.session.from.id + " " + redres.clientfullname + " sent: " + payload.session.initialText,
+                    //markdown: '**'+payload.session.from.id+" "+redres.clientfullname+'**' + " says: \n>" + payload.session.initialText,
+                    //files: ['http://company.com/myfile.doc']
+                //}).then(function(message) {
+                //    console.log("----- FUNCTION: PUBLISH SMS TO ROOM -----");
+                //    console.log('Message sent: %s', JSON.stringify(message));
+                }).catch(function(err){
+                    console.log(err);
+                });
+                res.writeHead(200, {'Content-Type': 'application/json'});
+                res.end('APPLICATION EXISTS IN DATABASE WITH A DEFINED SPARK ROOM @ '+ new Date().toString());
+            }
+        });
+
+    }
+    //res.end();
+});
