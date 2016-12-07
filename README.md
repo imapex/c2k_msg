@@ -102,6 +102,6 @@ node broker.js
 Alternatively, installation scripts are provided for deploying to a Marathon infrastructure
 
 ```
-bash marathon_install.sh
+bash app_install.sh
 
 ```
