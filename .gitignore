@@ -87,3 +87,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+/drone-secrets.yml
+/zoneix-demoapp.json
+/sparticalbroker.js
+/sparticaladmin.js
