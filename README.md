@@ -1,4 +1,4 @@
-# C2K Messaging Services (DRAFT)
+# C2K Messaging Services
 
 The C2K Messaging Service is a micro-service associated to the [C2K Project](https://github.com/imapex/c2k_demo). This particular micro-service is responsible for publishing messages from other C2K or standalone applications into a Spark room.    
 
@@ -35,3 +35,73 @@ This component -
 * Listens for and validates all inbound requests against a REDIS key-value store
 * First-time inbound requests create a Spark room with application owner's email address
 * Subsequent inbound requests publish messages to the room created for First-time inbound request
+
+# Prerequisites
+
+To use this application effectively, you will need the following
+
+* An active [Cisco Spark](https://developer.ciscospark.com/)
+ account and BOT token 
+ 
+* Redis store - consider using [RedisLabs Cloud Service](https://redislabs.com/)
+ 
+* A Mantl or marathon stack
+
+
+
+# Installation
+
+This application can be installed locally on your server, or by using Docker (preferred).
+In either mode the following environment variables must be present
+
+*     APP_URL=http://the.deployment.url
+*     LISTEN_HTTPS\_PORT=the HTTPS listening port
+*     LISTEN_HTTP\_PORT=the HTTP listening port
+*     REDIS_CONNECTION=redis://the-redis-provider-url:port
+*     SPARK_BOT\_TOKEN=Your Spark BOT token    
+    
+
+## Docker installation
+
+The latest version of this application is available on Docker hub. Start it by using
+the following command:
+```
+ docker run -it \
+-e APP_URL=http://the.deployment.url \
+-e LISTEN_HTTPS\_PORT=the HTTPS listening port \
+-e LISTEN_HTTP\_PORT=the HTTP listening port \
+-e REDIS_CONNECTION=redis://the-redis-provider-url:port \
+-e SPARK_BOT\_TOKEN=Your Spark BOT token \
+-p 8080:8080 imapex/c2k_msg`
+```
+## Local Installation
+
+* Clone this repo
+
+```
+git clone https://github.com/imapex/c2k_msg
+```
+* Make sure you have node.js setup 
+
+```
+cd c2k_msg
+```
+* Install dependencies in package.json
+
+```
+npm install
+```
+* Start the app
+
+```
+node broker.js
+```
+
+## Marathon Deployment
+
+Alternatively, installation scripts are provided for deploying to a Marathon infrastructure
+
+```
+bash marathon_install.sh
+
+```
