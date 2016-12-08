@@ -58,9 +58,19 @@ The following fields will be auto created by the application
 
 | Field  	| Value 	|
 |------------------	|-----------------------------------	|
-| sparkroomid      	| Spark room id obtained by application e.g. YIDHIHDSFJH/...
-             	|
-| sparkroomwebhook 	| Spark room webhook created by application e.g. UI8IQEKJH/... (used in future release)                                 	|
+| sparkroomid      	| Spark room id obtained by application e.g. YIDHIHDSFJH/...                            |
+| sparkroomwebhook 	| Spark room webhook created by application e.g. UI8IQEKJH/... (used in future release) |
+
+# Sample JSON
+
+Send the following JSON format to the application to publish your message to [Cisco Spark](https://developer.ciscospark.com/)
+
+```
+{
+    "appKey" : ”app-01-k0NiHzhql6",
+    "message" : "Your message to a Spark room"
+}
+```
 
 
 # Application Installation
