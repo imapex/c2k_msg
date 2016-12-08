@@ -18,8 +18,6 @@ The following repositories are where the actual code for the different involved 
 * [c2k_iox](https://github.com/imapex/c2k_iox) - Details on the Cisco IOx Client Application 
 * [c2k_listener](https://github.com/imapex/c2k_listener) - Details on the C2K payload listener
 
-# C2K Messaging Services
-
 ## Message Broker 
 
 This is the main listening service responsible for brokering the transaction between the users application (e.g. C2K Listener) and the Spark cloud.
@@ -60,7 +58,8 @@ The following fields will be auto created by the application
 
 | Field  	| Value 	|
 |------------------	|-----------------------------------	|
-| sparkroomid      	| Spark room id obtained by application e.g. YIDHIHDSFJH/...             	|
+| sparkroomid      	| Spark room id obtained by application e.g. YIDHIHDSFJH/...
+             	|
 | sparkroomwebhook 	| Spark room webhook created by application e.g. UI8IQEKJH/... (used in future release)                                 	|
 
 
