@@ -18,25 +18,23 @@ The following repositories are where the actual code for the different involved 
 * [c2k_iox](https://github.com/imapex/c2k_iox) - Details on the Cisco IOx Client Application 
 * [c2k_listener](https://github.com/imapex/c2k_listener) - Details on the C2K payload listener
 
-# C2K Messaging Services Pre-requisites
-
-Within the C2K Messaging Services Demonstration there are two Application Components that you'll need to setup.  Each of these are independent of each other.  You could do a modified demo of using only one component
-
-## Application Registration (future release)
-
-This component enables Spark subscribers to register their own applications. The registration process creates an API-Key for use in their JSON requests.
+# C2K Messaging Services
 
 ## Message Broker 
 
-This is main listening service responsible for brokering the transaction between the users application (e.g. C2K Listener) and the Spark cloud.
+This is the main listening service responsible for brokering the transaction between the users application (e.g. C2K Listener) and the Spark cloud.
  
-This component - 
+This application does the following:  
 
 * Listens for and validates all inbound requests against a REDIS key-value store
 * First-time inbound requests create a Spark room with application owner's email address
 * Subsequent inbound requests publish messages to the room created for First-time inbound request
 
-# Prerequisites
+![alt tag](https://raw.githubusercontent.com/zoneix/c2k_msg/master/first-message.png)
+
+![alt tag](https://raw.githubusercontent.com/zoneix/c2k_msg/master/subsequent-message.png)
+
+# Pre-requisites
 
 To use this application effectively, you will need the following
 
@@ -47,9 +45,26 @@ To use this application effectively, you will need the following
  
 * A Mantl or marathon stack
 
+# Redis key value store
+
+This release of the application requires manually creating a Redis Hash store for example
+
+Key: app-01-k0NiHzhql6
+
+| Field  	| Value 	|
+|------------------	|-----------------------------------	|
+| sparkagentemail      	| joe@example.com              	|
 
 
-# Installation
+The following fields will be auto created by the application
+
+| Field  	| Value 	|
+|------------------	|-----------------------------------	|
+| sparkroomid      	| Spark room id obtained by application e.g. YIDHIHDSFJH/...             	|
+| sparkroomwebhook 	| Spark room webhook created by application e.g. UI8IQEKJH/... (used in future release)                                 	|
+
+
+# Application Installation
 
 This application can be installed locally on your server, or by using Docker (preferred).
 In either mode the following environment variables must be present
